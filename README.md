@@ -31,3 +31,7 @@ Sensitive Groups (115)
 Updated 2017-01-15 00:00:00
 More info: http://aqicn.org/city/poland/mazowieckie/warszawa/marszalkowska
 ```
+
+# Known bugs
+
+* errors out if no places are found
