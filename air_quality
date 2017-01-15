@@ -12,16 +12,33 @@ from urllib.request import urlopen
 from termcolor import colored
 
 def aqi_readable(aqi):
-    if aqi <= 50: return colored('Good', 'green')
-    elif aqi <= 100: return colored('Moderate', 'yellow')
-    elif aqi <= 150: return colored('Unhealthy for Sensitive Groups', 'yellow')
-    elif aqi <= 200: return colored('Unhealthy', 'red')
-    elif aqi <= 300: return colored('Very Unhealthy', 'red')
-    else: return colored('Hazardous', 'red', attrs=['blink'])
+    if aqi <= 50:    return 'Good'
+    elif aqi <= 100: return 'Moderate'
+    elif aqi <= 150: return 'Unhealthy for Sensitive Groups'
+    elif aqi <= 200: return 'Unhealthy'
+    elif aqi <= 300: return 'Very Unhealthy'
+    else:            return 'Hazardous'
+
+def aqi_readable_colored(aqi):
+    if aqi <= 50:    return colored(aqi_readable(aqi), 'green')
+    elif aqi <= 100: return colored(aqi_readable(aqi), 'yellow')
+    elif aqi <= 150: return colored(aqi_readable(aqi), 'yellow')
+    elif aqi <= 200: return colored(aqi_readable(aqi), 'red')
+    elif aqi <= 300: return colored(aqi_readable(aqi), 'red')
+    else:            return colored(aqi_readable(aqi), 'red', attrs=['blink'])
+
+def aqi_color(aqi):
+    if aqi <= 50:    return '#009966'
+    elif aqi <= 100: return '#ffdd33'
+    elif aqi <= 150: return '#ff9933'
+    elif aqi <= 200: return '#cc0033'
+    elif aqi <= 300: return '#660099'
+    else:            return '#7e0023'
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('search_term', help='name of the place you want to get air quality information for')
+    parser.add_argument('--type', help="output type", choices=['text', 'json'], default='text')
     args = parser.parse_args()
 
     waqi_url = 'https://wind.waqi.info/nsearch/full/{}?n=12'.format(args.search_term)
@@ -29,11 +46,23 @@ def main():
     result = json.loads(response.read().decode('utf-8'))['results'][0]['s']
 
     aqi = int(result['a'])
-    place = colored(result['n'][0], 'cyan')
-    print('Air quality in {} is {} ({})'.format(place, aqi_readable(aqi), aqi))
-    update_time = colored(result['t'][0], 'cyan')
-    print('Updated {}'.format(update_time))
-    print('More info: http://aqicn.org/city/{}'.format(result['u']))
+    place = result['n'][0]
+    update_time = result['t'][0]
+
+    if args.type == 'json':
+        print(json.dumps({
+            'aqi': aqi,
+            'aqi_readable': aqi_readable(aqi),
+            'aqi_color_hex': aqi_color(aqi),
+            'place': place,
+            'update_time': update_time
+        }))
+    else:
+        print('Air quality in {} is {} ({})'.format(
+            colored(place, 'cyan'), aqi_readable_colored(aqi), aqi
+        ))
+        print('Updated {}'.format(colored(update_time, 'cyan')))
+        print('More info: http://aqicn.org/city/{}'.format(result['u']))
 
 if __name__ == '__main__':
     main()
