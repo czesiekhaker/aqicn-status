@@ -1,0 +1,39 @@
+#! /usr/bin/env python3
+# -*- coding: utf-8 -*-
+# vim:fenc=utf-8
+#
+# Copyright © 2017 Michał "czesiek" Czyżewski <me@czesiek.net>
+#
+# Distributed under terms of the MIT license.
+
+import json
+import argparse
+from urllib.request import urlopen
+from termcolor import colored
+
+def aqi_readable(aqi):
+    if aqi <= 50: return colored('Good', 'green')
+    elif aqi <= 100: return colored('Moderate', 'yellow')
+    elif aqi <= 150: return colored('Unhealthy for Sensitive Groups', 'yellow')
+    elif aqi <= 200: return colored('Unhealthy', 'red')
+    elif aqi <= 300: return colored('Very Unhealthy', 'red')
+    else: return colored('Hazardous', 'red', attrs=['blink'])
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('search_term', help='name of the place you want to get air quality information for')
+    args = parser.parse_args()
+
+    waqi_url = 'https://wind.waqi.info/nsearch/full/{}?n=12'.format(args.search_term)
+    response = urlopen(waqi_url)
+    result = json.loads(response.read().decode('utf-8'))['results'][0]['s']
+
+    aqi = int(result['a'])
+    place = colored(result['n'][0], 'cyan')
+    print('Air quality in {} is {} ({})'.format(place, aqi_readable(aqi), aqi))
+    update_time = colored(result['t'][0], 'cyan')
+    print('Updated {}'.format(update_time))
+    print('More info: http://aqicn.org/city/{}'.format(result['u']))
+
+if __name__ == '__main__':
+    main()
