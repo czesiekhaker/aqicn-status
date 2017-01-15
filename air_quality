@@ -48,6 +48,7 @@ def main():
     aqi = int(result['a'])
     place = result['n'][0]
     update_time = result['t'][0]
+    aqicn_url = 'http://aqicn.org/city/' + result['u']
 
     if args.type == 'json':
         print(json.dumps({
@@ -55,14 +56,15 @@ def main():
             'aqi_readable': aqi_readable(aqi),
             'aqi_color_hex': aqi_color(aqi),
             'place': place,
-            'update_time': update_time
+            'update_time': update_time,
+            'aqicn_url': aqicn_url
         }))
     else:
         print('Air quality in {} is {} ({})'.format(
             colored(place, 'cyan'), aqi_readable_colored(aqi), aqi
         ))
         print('Updated {}'.format(colored(update_time, 'cyan')))
-        print('More info: http://aqicn.org/city/{}'.format(result['u']))
+        print('More info: {}'.format(aqicn_url))
 
 if __name__ == '__main__':
     main()
